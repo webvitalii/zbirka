@@ -26,6 +26,7 @@ class App(QMainWindow):
         
         menu = self.menuBar()
         fileMenu = menu.addMenu('File')
+        toolsMenu = menu.addMenu('Tools')
 
         impMenu = QMenu('Import', self)
         impAct = QAction('Import mail', self)
@@ -33,14 +34,21 @@ class App(QMainWindow):
 
         greetAct = QAction('Greet', self)
         greetAct.triggered.connect(self.sayHi)
+        
+        whoisAct = QAction('WhoIs', self)
+        whoisAct.triggered.connect(self.whoIsPage)
 
         fileMenu.addAction(greetAct)
+        toolsMenu.addAction(whoisAct)
         fileMenu.addMenu(impMenu)
     
     def sayHi(self):
         inputText = self.inputField.text()
         self.textField.setText(f"Hi, {inputText}!")
 
+
+    def whoIsPage(self):
+        print("WhoIs page")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
