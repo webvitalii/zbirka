@@ -3,16 +3,17 @@ from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QLineEdit, QP
 from PySide6.QtGui import QIcon, QAction
 
 
-class App(QMainWindow):
+class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Python GUI")
         self.setFixedSize(800, 600) # width, height
         self.setWindowIcon(QIcon('assets/icon-ua-flag.ico'))
-
+        
         self.content_layout = QStackedLayout()
-        self.setCentralWidget(QWidget(self))
-        self.centralWidget().setLayout(self.content_layout)
+        self.central_widget = QWidget()
+        self.central_widget.setLayout(self.content_layout)
+        self.setCentralWidget(self.central_widget)
 
         self.create_menu()
         
@@ -25,8 +26,8 @@ class App(QMainWindow):
 
     def create_menu(self):
         menu = self.menuBar()
-        fileMenu = menu.addMenu('File')
-        toolsMenu = menu.addMenu('Tools')
+        file_menu = menu.addMenu('File')
+        tools_menu = menu.addMenu('Tools')
 
         impMenu = QMenu('Import', self)
         impAct = QAction('Import mail', self)
@@ -38,9 +39,10 @@ class App(QMainWindow):
         whois_action = QAction("Whois", self)
         whois_action.triggered.connect(self.show_whois)
 
-        toolsMenu.addAction(greet_action)
-        toolsMenu.addAction(whois_action)
-        fileMenu.addMenu(impMenu)
+        file_menu.addMenu(impMenu)
+        tools_menu.addAction(greet_action)
+        tools_menu.addAction(whois_action)
+        
 
     def show_whois(self):
         self.content_layout.setCurrentWidget(self.whois_page)
@@ -95,6 +97,6 @@ if __name__ == "__main__":
     app.setStyleSheet('''
                       QPushButton { font-size: 20px; }
                       ''')
-    window = App()
+    window = MainWindow()
     window.show()
     sys.exit(app.exec())
