@@ -25,7 +25,7 @@ class WhoisPage(QWidget):
         self.layout.addWidget(self.dns_btn)
 
         self.output_text = QTextEdit()
-        self.output_text.setReadOnly(True)  # Make output text non-editable
+        self.output_text.setReadOnly(True)
         self.layout.addWidget(self.output_text)
 
         self.setLayout(self.layout)

@@ -2,6 +2,7 @@ import sys
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QLineEdit, QPushButton, QTextEdit, QVBoxLayout, QMenu, QStackedLayout)
 from PySide6.QtGui import QIcon, QAction
 from ui.whois_page import WhoisPage
+from ui.csv_page import CsvPage
 
 
 class MainWindow(QMainWindow):
@@ -18,8 +19,8 @@ class MainWindow(QMainWindow):
 
         self.create_menu()
         
-        self.greet_page = GreetPage()
-        self.content_layout.addWidget(self.greet_page)
+        self.csv_page = CsvPage()
+        self.content_layout.addWidget(self.csv_page)
         
         self.whois_page = WhoisPage()
         self.content_layout.addWidget(self.whois_page)
@@ -34,44 +35,26 @@ class MainWindow(QMainWindow):
         impAct = QAction('Import mail', self)
         impMenu.addAction(impAct)
 
-        greet_action = QAction('Greet', self)
-        greet_action.triggered.connect(self.show_greet)
+        csv_action = QAction('CSV', self)
+        csv_action.triggered.connect(self.show_csv)
         
         whois_action = QAction("Whois", self)
         whois_action.triggered.connect(self.show_whois)
 
         file_menu.addMenu(impMenu)
-        tools_menu.addAction(greet_action)
+        tools_menu.addAction(csv_action)
         tools_menu.addAction(whois_action)
         
 
     def show_whois(self):
         self.content_layout.setCurrentWidget(self.whois_page)
         
-    def show_greet(self):
-        self.content_layout.setCurrentWidget(self.greet_page)
+    def show_csv(self):
+        self.content_layout.setCurrentWidget(self.csv_page)
 
     def sayHi(self):
         inputText = self.inputField.text()
         self.textField.setText(f"Hi, {inputText}!")
-
-        
-class GreetPage(QWidget):
-    def __init__(self):
-        super().__init__()
-
-        self.init_ui()
-
-    def init_ui(self):
-        self.layout = QVBoxLayout()
-
-        self.text_input = QLineEdit()
-        self.layout.addWidget(self.text_input)
-
-        self.submit_btn = QPushButton("Greet class")
-        self.layout.addWidget(self.submit_btn)
-
-        self.setLayout(self.layout)
 
 
 if __name__ == "__main__":
