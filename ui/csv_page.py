@@ -53,11 +53,12 @@ class CsvPage(QWidget):
         if hasattr(self, 'selected_file_path'):
             selected_fields = self.csv_fields_input.text()
             if selected_fields:
-                selected_fields = selected_fields.split(',')
+                selected_fields = [field.strip() for field in selected_fields.split(',')]
                 with open(self.selected_file_path, newline='') as csvfile:
                     reader = csv.DictReader(csvfile)
                     fieldnames = reader.fieldnames
-                    filtered_fieldnames = [field for field in fieldnames if field.strip() in selected_fields]
+                    filtered_fieldnames = [field for field in fieldnames if field in selected_fields]
+                    self.output_text.append(f"selected_fields: {selected_fields}")
                     new_file_path = os.path.join(os.path.dirname(self.selected_file_path), 'updated.csv')
                     with open(new_file_path, 'w', newline='') as new_csvfile:
                         writer = csv.DictWriter(new_csvfile, fieldnames=filtered_fieldnames)
@@ -65,11 +66,14 @@ class CsvPage(QWidget):
                         for row in reader:
                             filtered_row = {key: row[key] for key in filtered_fieldnames}
                             writer.writerow(filtered_row)
-                    self.output_text.append("New CSV file created successfully.")
-                    # Rename the new file to updated.csv
-                    os.rename(new_file_path, os.path.join(os.path.dirname(self.selected_file_path), 'updated.csv'))
+                    if os.path.getsize(new_file_path) > 0:
+                        self.output_text.append("New CSV file created successfully.")
+                        # Rename the new file to updated.csv
+                        os.rename(new_file_path, os.path.join(os.path.dirname(self.selected_file_path), 'updated.csv'))
+                    else:
+                        self.output_text.append("New CSV file is empty.")
             else:
                 self.output_text.append("Cancelled saving new CSV file.")
         else:
-            self.output_text.append("Please enter CSV fields to export.")
+            self.output_text.append("Please select a CSV file first.")
 
