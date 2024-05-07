@@ -1,0 +1,9 @@
+Convert to EXE:
+https://www.youtube.com/watch?v=U4zlCx-emzc
+
+>$ pip install pyinstaller
+>$ python -m pyinstaller zbirka.py
+>$ python -m pyinstaller --windowed zbirka.py
+>$ python -m pyinstaller --windowed --onefile zbirka.py
+>$ pyinstaller --windowed --onefile zbirka.py
+>$ pyinstaller zbirka.spec
