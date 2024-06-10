@@ -1,16 +1,15 @@
 import sys
 import requests
-from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QTextEdit, QPushButton
 import configparser
+from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QTextEdit, QPushButton, QScrollArea
 
 API_ENDPOINT = "https://api.perplexity.ai/chat/completions"
-
 
 def get_api_key():
     config = configparser.ConfigParser()
     config.read('pplx_config.ini')
     return config.get('PPLX', 'api_key')
-    
+
 API_KEY = get_api_key()
 
 def get_answer_from_perplexity(message):
@@ -21,7 +20,7 @@ def get_answer_from_perplexity(message):
     }
     
     payload = {
-        "model": "llama-3-sonar-large-32k-online",
+        "model": "llama-3-sonar-large-32k-chat",
         "messages": [
             {
                 "role": "system",
@@ -53,6 +52,7 @@ class PerplexityApp(QWidget):
         
     def initUI(self):
         self.setWindowTitle('Perplexity AI Chat')
+        self.setGeometry(100, 100, 800, 600)  # Set the width (w) and height (h) of the window
         
         self.layout = QVBoxLayout()
         
@@ -63,12 +63,17 @@ class PerplexityApp(QWidget):
         self.submit_button.clicked.connect(self.handleSubmit)
         
         self.output_label = QLabel('Output:', self)
-        self.output_text = QLabel('', self)
+        self.output_text = QTextEdit(self)
+        self.output_text.setReadOnly(True)
+        
+        self.scroll_area = QScrollArea(self)
+        self.scroll_area.setWidget(self.output_text)
+        self.scroll_area.setWidgetResizable(True)
         
         self.layout.addWidget(self.prompt_input)
         self.layout.addWidget(self.submit_button)
         self.layout.addWidget(self.output_label)
-        self.layout.addWidget(self.output_text)
+        self.layout.addWidget(self.scroll_area)
         
         self.setLayout(self.layout)
         
@@ -76,9 +81,9 @@ class PerplexityApp(QWidget):
         prompt = self.prompt_input.toPlainText()
         if prompt:
             answer = get_answer_from_perplexity(prompt)
-            self.output_text.setText(answer)
+            self.output_text.setPlainText(answer)
         else:
-            self.output_text.setText("Please enter a message.")
+            self.output_text.setPlainText("Please enter a message.")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
