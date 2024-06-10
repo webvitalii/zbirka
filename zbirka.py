@@ -1,7 +1,7 @@
 import sys
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QLineEdit, QPushButton, QTextEdit, QVBoxLayout, QMenu, QStackedLayout)
 from PySide6.QtGui import QIcon, QAction
-from ui.whois_page import WhoisPage
+from ui.youtube_page import YoutubePage
 from ui.csv_page import CsvPage
 
 
@@ -22,8 +22,8 @@ class MainWindow(QMainWindow):
         self.csv_page = CsvPage()
         self.content_layout.addWidget(self.csv_page)
         
-        self.whois_page = WhoisPage()
-        self.content_layout.addWidget(self.whois_page)
+        self.youtube_page = YoutubePage()
+        self.content_layout.addWidget(self.youtube_page)
 
 
     def create_menu(self):
@@ -38,16 +38,16 @@ class MainWindow(QMainWindow):
         csv_action = QAction('CSV', self)
         csv_action.triggered.connect(self.show_csv)
         
-        whois_action = QAction("Whois", self)
-        whois_action.triggered.connect(self.show_whois)
+        youtube_action = QAction("YouTube", self)
+        youtube_action.triggered.connect(self.show_youtube)
 
         file_menu.addMenu(impMenu)
         tools_menu.addAction(csv_action)
-        tools_menu.addAction(whois_action)
+        tools_menu.addAction(youtube_action)
         
 
-    def show_whois(self):
-        self.content_layout.setCurrentWidget(self.whois_page)
+    def show_youtube(self):
+        self.content_layout.setCurrentWidget(self.youtube_page)
         
     def show_csv(self):
         self.content_layout.setCurrentWidget(self.csv_page)
