@@ -1,6 +1,7 @@
 import sys
 import requests
 import configparser
+import markdown
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QTextEdit, QPushButton, QScrollArea
 
 API_ENDPOINT = "https://api.perplexity.ai/chat/completions"
@@ -20,7 +21,7 @@ def get_answer_from_perplexity(message):
     }
     
     payload = {
-        "model": "llama-3-sonar-large-32k-chat",
+        "model": "llama-3-sonar-large-32k-chat", # llama-3-sonar-large-32k-online
         "messages": [
             {
                 "role": "system",
@@ -44,6 +45,9 @@ def get_answer_from_perplexity(message):
             return "Error: No answer found in the response."
     else:
         return f"Error: {response.status_code} - {response.text}"
+
+def format_markdown_to_html(markdown_text):
+    return markdown.markdown(markdown_text, extensions=['fenced_code', 'codehilite'])
 
 class PerplexityApp(QWidget):
     def __init__(self):
@@ -81,7 +85,8 @@ class PerplexityApp(QWidget):
         prompt = self.prompt_input.toPlainText()
         if prompt:
             answer = get_answer_from_perplexity(prompt)
-            self.output_text.setPlainText(answer)
+            formatted_answer = format_markdown_to_html(answer)
+            self.output_text.setHtml(formatted_answer)
         else:
             self.output_text.setPlainText("Please enter a message.")
 
