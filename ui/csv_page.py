@@ -1,9 +1,8 @@
 from PySide6.QtWidgets import (QWidget, QLineEdit, QTextEdit, QPushButton, 
                                QVBoxLayout, QHBoxLayout, QFileDialog, QLabel, 
                                QMessageBox, QProgressBar)
-from PySide6.QtCore import Qt, QThread, Signal
+from PySide6.QtCore import QThread, Signal
 import csv
-import os
 
 class CsvConverterThread(QThread):
     progress_update = Signal(int)
@@ -102,6 +101,7 @@ class CsvPage(QWidget):
                 self.selected_file_path = file_paths[0]
                 self.csv_file_path_input.setText(self.selected_file_path)
                 self.load_csv_fields()
+                self.output_text.clear()
 
     def load_csv_fields(self):
         try:
