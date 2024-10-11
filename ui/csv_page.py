@@ -9,17 +9,18 @@ class CsvConverterThread(QThread):
     conversion_complete = Signal(str)
     error_occurred = Signal(str)
 
-    def __init__(self, input_file, output_file, selected_fields, delimiter):
+    def __init__(self, input_file, output_file, selected_fields, input_delimiter, output_delimiter):
         super().__init__()
         self.input_file = input_file
         self.output_file = output_file
         self.selected_fields = selected_fields
-        self.delimiter = delimiter
+        self.input_delimiter = input_delimiter
+        self.output_delimiter = output_delimiter
 
     def run(self):
         try:
             with open(self.input_file, 'r', newline='', encoding='utf-8') as csvfile:
-                reader = csv.DictReader(csvfile, delimiter=self.delimiter)
+                reader = csv.DictReader(csvfile, delimiter=self.input_delimiter)
                 fieldnames = reader.fieldnames
                 filtered_fieldnames = [field for field in fieldnames if field in self.selected_fields]
                 
@@ -28,7 +29,7 @@ class CsvConverterThread(QThread):
                 next(reader)  # Skip header row
                 
                 with open(self.output_file, 'w', newline='', encoding='utf-8') as new_csvfile:
-                    writer = csv.DictWriter(new_csvfile, fieldnames=filtered_fieldnames, delimiter=self.delimiter)
+                    writer = csv.DictWriter(new_csvfile, fieldnames=filtered_fieldnames, delimiter=self.output_delimiter)
                     writer.writeheader()
                     
                     for i, row in enumerate(reader, 1):
@@ -44,6 +45,7 @@ class CsvPage(QWidget):
     def __init__(self):
         super().__init__()
         self.selected_file_path = None
+        self.current_delimiter = ","
         self.init_ui()
 
     def init_ui(self):
@@ -52,8 +54,7 @@ class CsvPage(QWidget):
         # File selection
         file_layout = QHBoxLayout()
         self.csv_file_path_input = QLineEdit()
-        self.csv_file_path_input.setPlaceholderText("Select a CSV file")
-        self.select_csv_file_btn = QPushButton("Browse")
+        self.select_csv_file_btn = QPushButton("Browse to select a CSV file")
         self.select_csv_file_btn.clicked.connect(self.select_csv_file)
         file_layout.addWidget(self.csv_file_path_input)
         file_layout.addWidget(self.select_csv_file_btn)
@@ -65,15 +66,19 @@ class CsvPage(QWidget):
         self.csv_fields_input = QLineEdit()
         self.layout.addWidget(self.csv_fields_input)
 
-        # Delimiter selection
-        delimiter_layout = QHBoxLayout()
-        self.delimiter_label = QLabel("Delimiter:")
-        self.delimiter_input = QLineEdit(",")
-        self.delimiter_input.setMaximumWidth(30)
-        delimiter_layout.addWidget(self.delimiter_label)
-        delimiter_layout.addWidget(self.delimiter_input)
-        delimiter_layout.addStretch()
-        self.layout.addLayout(delimiter_layout)
+        # Current delimiter display
+        self.current_delimiter_label = QLabel(f"Current delimiter: {self.current_delimiter}")
+        self.layout.addWidget(self.current_delimiter_label)
+
+        # New delimiter input
+        new_delimiter_layout = QHBoxLayout()
+        self.new_delimiter_label = QLabel("New delimiter:")
+        self.new_delimiter_input = QLineEdit(self.current_delimiter)
+        self.new_delimiter_input.setMaximumWidth(30)
+        new_delimiter_layout.addWidget(self.new_delimiter_label)
+        new_delimiter_layout.addWidget(self.new_delimiter_input)
+        new_delimiter_layout.addStretch()
+        self.layout.addLayout(new_delimiter_layout)
 
         # Convert button
         self.create_csv_file_btn = QPushButton("Convert CSV")
@@ -106,7 +111,13 @@ class CsvPage(QWidget):
     def load_csv_fields(self):
         try:
             with open(self.selected_file_path, 'r', newline='', encoding='utf-8') as csvfile:
-                reader = csv.reader(csvfile, delimiter=self.delimiter_input.text())
+                dialect = csv.Sniffer().sniff(csvfile.read(1024))
+                csvfile.seek(0)
+                self.current_delimiter = dialect.delimiter
+                self.current_delimiter_label.setText(f"Current delimiter: {self.current_delimiter}")
+                self.new_delimiter_input.setText(self.current_delimiter)
+                
+                reader = csv.reader(csvfile, delimiter=self.current_delimiter)
                 fields = next(reader)
                 self.csv_fields_input.setText(','.join(fields))
         except Exception as e:
@@ -131,7 +142,8 @@ class CsvPage(QWidget):
         self.output_text.clear()
 
         self.converter_thread = CsvConverterThread(
-            self.selected_file_path, output_file, selected_fields, self.delimiter_input.text())
+            self.selected_file_path, output_file, selected_fields, 
+            self.current_delimiter, self.new_delimiter_input.text())
         self.converter_thread.progress_update.connect(self.update_progress)
         self.converter_thread.conversion_complete.connect(self.conversion_completed)
         self.converter_thread.error_occurred.connect(self.conversion_error)
