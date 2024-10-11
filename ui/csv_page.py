@@ -22,7 +22,9 @@ class CsvConverterThread(QThread):
             with open(self.input_file, 'r', newline='', encoding='utf-8') as csvfile:
                 reader = csv.DictReader(csvfile, delimiter=self.input_delimiter)
                 fieldnames = reader.fieldnames
-                filtered_fieldnames = [field for field in fieldnames if field in self.selected_fields]
+                
+                # Filter and order fields based on user selection
+                filtered_fieldnames = [field.strip() for field in self.selected_fields if field.strip() in fieldnames]
                 
                 total_rows = sum(1 for row in csvfile)
                 csvfile.seek(0)
@@ -61,7 +63,7 @@ class CsvPage(QWidget):
         self.layout.addLayout(file_layout)
 
         # Fields selection
-        self.csv_fields_label = QLabel("Enter CSV fields to export (comma-separated)")
+        self.csv_fields_label = QLabel("Enter CSV fields to export (comma-separated, order matters)")
         self.layout.addWidget(self.csv_fields_label)
         self.csv_fields_input = QLineEdit()
         self.layout.addWidget(self.csv_fields_input)
