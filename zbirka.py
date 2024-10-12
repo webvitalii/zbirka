@@ -3,6 +3,7 @@ from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QStackedLayou
 from PySide6.QtGui import QIcon, QAction
 from ui.csv_page import CsvPage
 from ui.home_page import HomePage
+from ui.json_page import JSONPage
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -20,8 +21,10 @@ class MainWindow(QMainWindow):
         
         self.home_page = HomePage()
         self.csv_page = CsvPage()
+        self.json_page = JSONPage()
         self.content_layout.addWidget(self.home_page)
         self.content_layout.addWidget(self.csv_page)
+        self.content_layout.addWidget(self.json_page)
 
         # Set the home page as the default view
         self.content_layout.setCurrentWidget(self.home_page)
@@ -39,15 +42,22 @@ class MainWindow(QMainWindow):
         csv_action.triggered.connect(self.show_csv)
         tools_menu.addAction(csv_action)
 
+        json_action = QAction('JSON', self)
+        json_action.triggered.connect(self.show_json)
+        tools_menu.addAction(json_action)
+
     def show_home(self):
         self.content_layout.setCurrentWidget(self.home_page)
         
     def show_csv(self):
         self.content_layout.setCurrentWidget(self.csv_page)
 
+    def show_json(self):
+        self.content_layout.setCurrentWidget(self.json_page)
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    app.setStyle("Fusion") # ['Breeze', 'Oxygen', 'QtCurve', 'Windows', 'Fusion']
+    app.setStyle("Fusion")
     app.setStyleSheet('''
                       QPushButton { font-size: 20px; }
                       ''')

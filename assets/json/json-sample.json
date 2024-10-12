@@ -1,0 +1,122 @@
+{
+    "string": "Hello, World!",
+    "integer": 42,
+    "float": 3.14159,
+    "boolean": true,
+    "null": null,
+    "array": [
+        1,
+        2,
+        3,
+        4,
+        5
+    ],
+    "object": {
+        "key": "value"
+    },
+    "nested_object": {
+        "level1": {
+            "level2": {
+                "level3": "Deep nesting"
+            }
+        }
+    },
+    "array_of_objects": [
+        {
+            "name": "John",
+            "age": 30
+        },
+        {
+            "name": "Jane",
+            "age": 25
+        }
+    ],
+    "mixed_array": [
+        1,
+        "two",
+        3.0,
+        true,
+        null,
+        {
+            "key": "value"
+        }
+    ],
+    "long_string": "This is a very long string that spans multiple lines in the JSON file but should be displayed as a single line when parsed.",
+    "special_characters": "!@#$%^&*()_+{}[]|\\:;\"'<>,.?/~`",
+    "unicode": "Unicode characters: \u00c3\u00b1, \u00c3\u00a9, \u00c3\u00bc, \u00c3\u0178, \u00e4\u00bd\u00a0\u00e5\u00a5\u00bd",
+    "date": "2023-04-01T12:00:00Z",
+    "url": "https://www.example.com",
+    "email": "user@example.com",
+    "large_number": 1234567890123456789,
+    "small_number": 1e-10,
+    "exponential": 1.23e-05,
+    "binary": "0b1010",
+    "hexadecimal": "0xFF",
+    "array_of_arrays": [
+        [
+            1,
+            2,
+            3
+        ],
+        [
+            4,
+            5,
+            6
+        ],
+        [
+            7,
+            8,
+            9
+        ]
+    ],
+    "empty_object": {},
+    "empty_array": [],
+    "whitespace": "    This string has leading and trailing whitespace    ",
+    "multiline_string": "This string\nspans multiple\nlines",
+    "complex_object": {
+        "data": [
+            {
+                "id": 1,
+                "type": "user",
+                "attributes": {
+                    "name": "John Doe",
+                    "email": "john@example.com",
+                    "settings": {
+                        "notifications": true,
+                        "theme": "dark"
+                    }
+                },
+                "relationships": {
+                    "posts": [
+                        1,
+                        2,
+                        3
+                    ],
+                    "comments": [
+                        4,
+                        5
+                    ]
+                }
+            },
+            {
+                "id": 2,
+                "type": "post",
+                "attributes": {
+                    "title": "JSON Testing",
+                    "content": "This is a test post for JSON parsing",
+                    "tags": [
+                        "json",
+                        "testing",
+                        "programming"
+                    ]
+                },
+                "metadata": {
+                    "created_at": "2023-04-01T10:00:00Z",
+                    "updated_at": "2023-04-01T11:00:00Z",
+                    "views": 100,
+                    "likes": 10
+                }
+            }
+        ]
+    }
+}
