@@ -4,6 +4,7 @@ from PySide6.QtGui import QIcon, QAction
 from ui.csv_page import CsvPage
 from ui.home_page import HomePage
 from ui.json_page import JSONPage
+from ui.web_analyzer_page import WebAnalyzerPage
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -22,9 +23,11 @@ class MainWindow(QMainWindow):
         self.home_page = HomePage()
         self.csv_page = CsvPage()
         self.json_page = JSONPage()
+        self.web_analyzer_page = WebAnalyzerPage()  # Add this line
         self.content_layout.addWidget(self.home_page)
         self.content_layout.addWidget(self.csv_page)
         self.content_layout.addWidget(self.json_page)
+        self.content_layout.addWidget(self.web_analyzer_page)  # Add this line
 
         # Set the home page as the default view
         self.content_layout.setCurrentWidget(self.home_page)
@@ -46,6 +49,10 @@ class MainWindow(QMainWindow):
         json_action.triggered.connect(self.show_json)
         tools_menu.addAction(json_action)
 
+        web_analyzer_action = QAction('Web Analyzer', self)  # Add this action
+        web_analyzer_action.triggered.connect(self.show_web_analyzer)
+        tools_menu.addAction(web_analyzer_action)
+
     def show_home(self):
         self.content_layout.setCurrentWidget(self.home_page)
         
@@ -54,6 +61,9 @@ class MainWindow(QMainWindow):
 
     def show_json(self):
         self.content_layout.setCurrentWidget(self.json_page)
+
+    def show_web_analyzer(self):  # Add this method
+        self.content_layout.setCurrentWidget(self.web_analyzer_page)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
