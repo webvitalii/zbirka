@@ -57,7 +57,7 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    app.setStyle("Fusion")
+    app.setStyle("Fusion") # ['Breeze', 'Oxygen', 'QtCurve', 'Windows', 'Fusion']
     app.setStyleSheet('''
                       QPushButton { font-size: 20px; }
                       ''')
