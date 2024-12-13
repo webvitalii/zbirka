@@ -6,6 +6,7 @@ import socket
 import ssl
 import requests
 from urllib.parse import urlparse
+import re
 
 class WebAnalyzerThread(QThread):
     update_progress = Signal(int)
@@ -28,7 +29,7 @@ class WebAnalyzerThread(QThread):
             domain = parsed_url.netloc
 
             # DNS information
-            self.update_progress.emit(30)
+            self.update_progress.emit(20)
             self.update_result.emit("\nFetching DNS information...\n")
             for qtype in ['A', 'AAAA', 'MX', 'NS', 'TXT']:
                 try:
@@ -41,7 +42,7 @@ class WebAnalyzerThread(QThread):
                     self.update_result.emit(f"Error fetching {qtype} record: {str(e)}\n")
 
             # SSL Certificate information
-            self.update_progress.emit(60)
+            self.update_progress.emit(40)
             self.update_result.emit("\nChecking SSL Certificate...\n")
             try:
                 context = ssl.create_default_context()
@@ -59,15 +60,57 @@ class WebAnalyzerThread(QThread):
             except Exception as e:
                 self.update_result.emit(f"SSL Certificate Error: {str(e)}\n")
 
-            # HTTP Headers
-            self.update_progress.emit(80)
-            self.update_result.emit("\nFetching HTTP Headers...\n")
+            # HTTP Headers and Content
+            self.update_progress.emit(60)
+            self.update_result.emit("\nFetching HTTP Headers and Content...\n")
             try:
-                response = requests.head(self.url, allow_redirects=True)
+                response = requests.get(self.url, allow_redirects=True, timeout=10)
+                
+                # Headers
+                self.update_result.emit("HTTP Headers:\n")
                 for header, value in response.headers.items():
                     self.update_result.emit(f"{header}: {value}\n")
+                
+                # Status Code
+                self.update_result.emit(f"\nStatus Code: {response.status_code}\n")
+                
+                # Content Type
+                self.update_result.emit(f"Content Type: {response.headers.get('Content-Type', 'Not specified')}\n")
+                
+                # Page Size
+                self.update_result.emit(f"Page Size: {len(response.content)} bytes\n")
+                
+                # Extract information from content
+                content = response.text
+                
+                # Title (using regex)
+                title_match = re.search('<title>(.*?)</title>', content, re.IGNORECASE)
+                title = title_match.group(1) if title_match else "No title found"
+                self.update_result.emit(f"Page Title: {title}\n")
+                
+                # Meta description (using regex)
+                meta_desc_match = re.search('<meta\\s+name=["\']description["\']\\s+content=["\'](.*?)["\']', content, re.IGNORECASE)
+                if meta_desc_match:
+                    self.update_result.emit(f"Meta Description: {meta_desc_match.group(1)}\n")
+                
+                # Links count
+                links_count = content.count('<a ')
+                self.update_result.emit(f"Number of links: {links_count}\n")
+                
+                # Images count
+                images_count = content.count('<img ')
+                self.update_result.emit(f"Number of images: {images_count}\n")
+                
+                # Scripts count
+                scripts_count = content.count('<script')
+                self.update_result.emit(f"Number of scripts: {scripts_count}\n")
+                
+                # Stylesheets count
+                stylesheets_count = len(re.findall('<link[^>]+rel=["\'](stylesheet|style)["\']', content, re.IGNORECASE))
+                self.update_result.emit(f"Number of stylesheets: {stylesheets_count}\n")
+                
             except requests.RequestException as e:
-                self.update_result.emit(f"Error fetching HTTP headers: {str(e)}\n")
+                self.update_result.emit(f"Error fetching HTTP content: {str(e)}\n")
 
             self.update_progress.emit(100)
             self.update_result.emit("\nAnalysis complete!\n")
