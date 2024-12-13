@@ -1,0 +1,5 @@
+todo:
+
+* add Settings page
+* store API key
+* add list of prev conversations
