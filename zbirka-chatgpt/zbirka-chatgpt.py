@@ -1,51 +1,62 @@
 import sys
-from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QStackedLayout)
-from PySide6.QtGui import QIcon, QAction
-from ui.home_page import HomePage
+from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout
+from PySide6.QtGui import QAction
 from ui.chatgpt_page import ChatGPTPage
+from ui.settings_page import SettingsPage
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("ChatGPT Desktop")
-        self.setFixedSize(800, 600)  # width, height
-        self.setWindowIcon(QIcon('assets/icon.ico'))
+        self.setWindowTitle("Zbirka ChatGPT")
+        self.setMinimumSize(800, 600)
         
-        self.content_layout = QStackedLayout()
-        self.central_widget = QWidget()
-        self.central_widget.setLayout(self.content_layout)
-        self.setCentralWidget(self.central_widget)
-
-        self.create_menu()
+        # Create central widget and layout
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
+        self.layout = QVBoxLayout(central_widget)
         
-        self.home_page = HomePage()
+        # Create pages
         self.chatgpt_page = ChatGPTPage()
-        self.content_layout.addWidget(self.home_page)
-        self.content_layout.addWidget(self.chatgpt_page)
-
-        # Set the home page as the default view
-        self.content_layout.setCurrentWidget(self.home_page)
-
-    def create_menu(self):
-        menu = self.menuBar()
-        file_menu = menu.addMenu('File')
-        tools_menu = menu.addMenu('Tools')
-
-        home_action = QAction('Home', self)
-        home_action.triggered.connect(self.show_home)
-        file_menu.addAction(home_action)
-
-        chatgpt_action = QAction('ChatGPT', self)
+        self.settings_page = SettingsPage()
+        
+        # Connect settings page signal to ChatGPT page
+        self.settings_page.api_key_changed.connect(self.chatgpt_page.update_api_key)
+        
+        # Show ChatGPT page by default
+        self.layout.addWidget(self.chatgpt_page)
+        self.chatgpt_page.show()
+        self.settings_page.hide()
+        
+        # Create menu bar
+        self.create_menu_bar()
+        
+    def create_menu_bar(self):
+        menu_bar = self.menuBar()
+        tools_menu = menu_bar.addMenu("Tools")
+        
+        # ChatGPT action
+        chatgpt_action = QAction("ChatGPT", self)
         chatgpt_action.triggered.connect(self.show_chatgpt)
         tools_menu.addAction(chatgpt_action)
-
-    def show_home(self):
-        self.content_layout.setCurrentWidget(self.home_page)
-
+        
+        # Settings action
+        settings_action = QAction("Settings", self)
+        settings_action.triggered.connect(self.show_settings)
+        tools_menu.addAction(settings_action)
+        
     def show_chatgpt(self):
-        self.content_layout.setCurrentWidget(self.chatgpt_page)
+        self.settings_page.hide()
+        self.layout.removeWidget(self.settings_page)
+        self.layout.addWidget(self.chatgpt_page)
+        self.chatgpt_page.show()
+        
+    def show_settings(self):
+        self.chatgpt_page.hide()
+        self.layout.removeWidget(self.chatgpt_page)
+        self.layout.addWidget(self.settings_page)
+        self.settings_page.show()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app = QApplication(sys.argv)
     app.setStyle("Fusion") # ['Breeze', 'Oxygen', 'QtCurve', 'Windows', 'Fusion']
     app.setStyleSheet('''
