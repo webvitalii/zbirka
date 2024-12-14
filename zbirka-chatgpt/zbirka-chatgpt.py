@@ -22,6 +22,7 @@ class MainWindow(QMainWindow):
         # Connect settings page signals to ChatGPT page
         self.settings_page.api_key_changed.connect(self.chatgpt_page.update_api_key)
         self.settings_page.model_changed.connect(self.chatgpt_page.update_model)
+        self.settings_page.temperature_changed.connect(self.chatgpt_page.update_temperature)
         
         # Show ChatGPT page by default
         self.layout.addWidget(self.chatgpt_page)

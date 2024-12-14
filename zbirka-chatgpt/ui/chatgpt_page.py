@@ -12,6 +12,7 @@ class ChatGPTPage(QWidget):
         super().__init__()
         self.client = None
         self.model = "gpt-3.5-turbo"  # Default model
+        self.temperature = 0.7  # Default temperature
         self.chat_history = []
         self.setup_ui()
         self.load_api_key()
@@ -24,6 +25,7 @@ class ChatGPTPage(QWidget):
                     settings = json.load(f)
                     api_key = settings.get('api_key', '')
                     self.model = settings.get('model', 'gpt-3.5-turbo')
+                    self.temperature = settings.get('temperature', 0.7)
                     if api_key:
                         self.update_api_key(api_key)
         except Exception:
@@ -75,7 +77,8 @@ class ChatGPTPage(QWidget):
                 self.client.chat.completions.create(
                     model=self.model,
                     messages=[{"role": "user", "content": "test"}],
-                    max_tokens=5
+                    max_tokens=5,
+                    temperature=self.temperature
                 )
             except Exception as e:
                 self.client = None
@@ -89,6 +92,9 @@ class ChatGPTPage(QWidget):
             
     def update_model(self, model):
         self.model = model
+        
+    def update_temperature(self, temperature):
+        self.temperature = temperature
         
     def send_message(self):
         if not self.client:
@@ -113,7 +119,8 @@ class ChatGPTPage(QWidget):
             # Get response from ChatGPT
             response = self.client.chat.completions.create(
                 model=self.model,
-                messages=self.chat_history
+                messages=self.chat_history,
+                temperature=self.temperature
             )
             
             # Extract and display the response

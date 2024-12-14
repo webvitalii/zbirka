@@ -3,12 +3,13 @@ import json
 from pathlib import Path
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, 
                               QLabel, QLineEdit, QPushButton, QMessageBox,
-                              QComboBox)
+                              QComboBox, QSlider)
 from PySide6.QtCore import Qt, Signal
 
 class SettingsPage(QWidget):
     api_key_changed = Signal(str)
     model_changed = Signal(str)
+    temperature_changed = Signal(float)
     
     def __init__(self):
         super().__init__()
@@ -51,6 +52,29 @@ class SettingsPage(QWidget):
         model_layout.addWidget(self.model_selector)
         layout.addLayout(model_layout)
         
+        # Temperature section
+        temp_layout = QHBoxLayout()
+        temp_label = QLabel("Temperature:")
+        self.temp_slider = QSlider(Qt.Horizontal)
+        self.temp_slider.setMinimum(0)
+        self.temp_slider.setMaximum(20)  # 0.0 to 2.0
+        self.temp_slider.setValue(7)      # Default 0.7
+        self.temp_slider.setTickPosition(QSlider.TicksBelow)
+        self.temp_slider.setTickInterval(2)
+        
+        self.temp_value_label = QLabel("0.7")
+        self.temp_value_label.setMinimumWidth(50)
+        self.temp_desc_label = QLabel("(Balanced)")
+        self.temp_desc_label.setMinimumWidth(100)
+        
+        self.temp_slider.valueChanged.connect(self.update_temp_label)
+        
+        temp_layout.addWidget(temp_label)
+        temp_layout.addWidget(self.temp_slider)
+        temp_layout.addWidget(self.temp_value_label)
+        temp_layout.addWidget(self.temp_desc_label)
+        layout.addLayout(temp_layout)
+        
         # Save button
         save_layout = QHBoxLayout()
         save_layout.addStretch()
@@ -67,6 +91,21 @@ class SettingsPage(QWidget):
         layout.addStretch()
         self.setLayout(layout)
         
+    def update_temp_label(self, value):
+        temp = value / 10.0
+        self.temp_value_label.setText(f"{temp:.1f}")
+        
+        # Update description based on temperature
+        if temp <= 0.3:
+            desc = "(Focused)"
+        elif temp <= 0.7:
+            desc = "(Balanced)"
+        elif temp <= 1.2:
+            desc = "(Creative)"
+        else:
+            desc = "(Random)"
+        self.temp_desc_label.setText(desc)
+        
     def load_settings(self):
         try:
             if self.settings_file.exists():
@@ -74,6 +113,8 @@ class SettingsPage(QWidget):
                     settings = json.load(f)
                     api_key = settings.get('api_key', '')
                     model = settings.get('model', 'gpt-3.5-turbo')
+                    temperature = settings.get('temperature', 0.7)
+                    
                     self.api_key_input.setText(api_key)
                     
                     # Find and select the saved model
@@ -81,11 +122,15 @@ class SettingsPage(QWidget):
                     if index >= 0:
                         self.model_selector.setCurrentIndex(index)
                     
+                    # Set temperature slider
+                    self.temp_slider.setValue(int(temperature * 10))
+                    
                     if api_key:
                         self.status_label.setText("Settings loaded")
                         self.status_label.setStyleSheet("color: green;")
                         self.api_key_changed.emit(api_key)
                         self.model_changed.emit(model)
+                        self.temperature_changed.emit(temperature)
         except Exception as e:
             self.status_label.setText("Error loading settings")
             self.status_label.setStyleSheet("color: red;")
@@ -99,9 +144,12 @@ class SettingsPage(QWidget):
                 return
                 
             model = self.model_selector.currentData()
+            temperature = self.temp_slider.value() / 10.0
+            
             settings = {
                 'api_key': api_key,
-                'model': model
+                'model': model,
+                'temperature': temperature
             }
             
             with open(self.settings_file, 'w') as f:
@@ -111,6 +159,7 @@ class SettingsPage(QWidget):
             self.status_label.setStyleSheet("color: green;")
             self.api_key_changed.emit(api_key)
             self.model_changed.emit(model)
+            self.temperature_changed.emit(temperature)
             QMessageBox.information(self, "Success", "Settings saved successfully!")
             
         except Exception as e:
