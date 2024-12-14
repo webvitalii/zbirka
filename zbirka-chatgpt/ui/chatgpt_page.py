@@ -11,6 +11,7 @@ class ChatGPTPage(QWidget):
     def __init__(self):
         super().__init__()
         self.client = None
+        self.model = "gpt-3.5-turbo"  # Default model
         self.chat_history = []
         self.setup_ui()
         self.load_api_key()
@@ -22,6 +23,7 @@ class ChatGPTPage(QWidget):
                 with open(settings_file, 'r') as f:
                     settings = json.load(f)
                     api_key = settings.get('api_key', '')
+                    self.model = settings.get('model', 'gpt-3.5-turbo')
                     if api_key:
                         self.update_api_key(api_key)
         except Exception:
@@ -47,7 +49,7 @@ class ChatGPTPage(QWidget):
         
         # Status label
         self.status_label = QLabel()
-        self.status_label.setMinimumWidth(100)  # Ensure the label has minimum width
+        self.status_label.setMinimumWidth(100)
         self.status_label.setStyleSheet("color: gray;")
         bottom_layout.addWidget(self.status_label)
         
@@ -71,7 +73,7 @@ class ChatGPTPage(QWidget):
                 
                 # Test the API key
                 self.client.chat.completions.create(
-                    model="gpt-3.5-turbo",
+                    model=self.model,
                     messages=[{"role": "user", "content": "test"}],
                     max_tokens=5
                 )
@@ -84,6 +86,9 @@ class ChatGPTPage(QWidget):
             self.client = None
             self.status_label.setText("API Key Not Set")
             self.status_label.setStyleSheet("color: red;")
+            
+    def update_model(self, model):
+        self.model = model
         
     def send_message(self):
         if not self.client:
@@ -107,7 +112,7 @@ class ChatGPTPage(QWidget):
         try:
             # Get response from ChatGPT
             response = self.client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model=self.model,
                 messages=self.chat_history
             )
             
