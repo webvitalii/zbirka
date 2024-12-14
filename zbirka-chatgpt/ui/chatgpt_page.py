@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, 
-                                  QTextEdit, QPushButton, QLabel)
+                                  QTextEdit, QPushButton, QLabel, QApplication)
 from PySide6.QtCore import Qt
 from openai import OpenAI
 import os
@@ -30,11 +30,6 @@ class ChatGPTPage(QWidget):
     def setup_ui(self):
         layout = QVBoxLayout()
         
-        # Status label
-        self.status_label = QLabel()
-        self.status_label.setStyleSheet("color: red;")
-        layout.addWidget(self.status_label)
-        
         # Chat history display
         self.chat_display = QTextEdit()
         self.chat_display.setReadOnly(True)
@@ -47,14 +42,24 @@ class ChatGPTPage(QWidget):
         self.user_input.setPlaceholderText("Type your message here...")
         layout.addWidget(self.user_input)
         
+        # Bottom layout with status and send button
+        bottom_layout = QHBoxLayout()
+        
+        # Status label
+        self.status_label = QLabel()
+        self.status_label.setMinimumWidth(100)  # Ensure the label has minimum width
+        self.status_label.setStyleSheet("color: gray;")
+        bottom_layout.addWidget(self.status_label)
+        
+        # Add stretch to push send button to the right
+        bottom_layout.addStretch()
+        
         # Send button
-        send_layout = QHBoxLayout()
-        send_layout.addStretch()
         self.send_button = QPushButton("Send")
         self.send_button.clicked.connect(self.send_message)
-        send_layout.addWidget(self.send_button)
-        layout.addLayout(send_layout)
+        bottom_layout.addWidget(self.send_button)
         
+        layout.addLayout(bottom_layout)
         self.setLayout(layout)
         
     def update_api_key(self, key):
@@ -88,7 +93,13 @@ class ChatGPTPage(QWidget):
         user_message = self.user_input.toPlainText().strip()
         if not user_message:
             return
-            
+        
+        # Show loading state
+        self.status_label.setText("Loading...")
+        self.status_label.setStyleSheet("color: gray;")
+        self.send_button.setEnabled(False)
+        QApplication.processEvents()  # Force UI update
+        
         # Add user message to chat history
         self.chat_history.append({"role": "user", "content": user_message})
         self.chat_display.append(f"You: {user_message}\n")
@@ -105,6 +116,10 @@ class ChatGPTPage(QWidget):
             self.chat_history.append({"role": "assistant", "content": assistant_message})
             self.chat_display.append(f"Assistant: {assistant_message}\n")
             
+            # Reset status on success
+            self.status_label.setText("")
+            self.status_label.setStyleSheet("color: green;")
+            
         except httpx.ConnectError:
             error_msg = ("Connection error: Unable to connect to OpenAI servers.\n"
                         "This might be due to:\n"
@@ -112,10 +127,19 @@ class ChatGPTPage(QWidget):
                         "2. Firewall blocking the connection\n"
                         "3. Need for proxy configuration")
             self.chat_display.append(f"Error: {error_msg}\n")
+            self.status_label.setText("")
+            self.status_label.setStyleSheet("color: red;")
         except httpx.TimeoutException:
             self.chat_display.append("Error: Request timed out. Please try again.\n")
+            self.status_label.setText("")
+            self.status_label.setStyleSheet("color: red;")
         except Exception as e:
             self.chat_display.append(f"Error: {str(e)}\n")
+            self.status_label.setText("")
+            self.status_label.setStyleSheet("color: red;")
+        finally:
+            # Always re-enable the send button
+            self.send_button.setEnabled(True)
             
         # Clear input field
         self.user_input.clear()
